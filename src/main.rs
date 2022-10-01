@@ -1,5 +1,6 @@
 use image::{GenericImageView};
 use std::env;
+use std::process;
 
 fn get_str_ascii(intent :u8)-> &'static str{
     let index = intent/32;
@@ -8,7 +9,10 @@ fn get_str_ascii(intent :u8)-> &'static str{
 }
 
 fn get_image(dir: &str, scale: u32){
-    let img = image::open(dir).unwrap();
+    let img = image::open(dir).unwrap_or_else(|error| {
+        println!("Failed to load the image!");
+        process::exit(1);
+    });
     println!("{:?}", img.dimensions());
     let (width,height) = img.dimensions();
     for y in 0..height{
@@ -29,6 +33,10 @@ fn get_image(dir: &str, scale: u32){
 }
 fn main() {
     let args: Vec<String> = env::args().collect();
-    println!("ARGS : {}", &args[1]);
-    get_image(&args[1], 4);
+    if args.len() < 3 {
+        println!("Not enought arguments!");
+        process::exit(1);
+    }
+    let convert_scale: u32 = args[2].parse().unwrap();
+    get_image(&args[1], convert_scale);
 }
